@@ -1,4 +1,3 @@
-
 import * as dat from 'dat.gui'
 
 let guiA = new dat.GUI();
@@ -12,12 +11,8 @@ const settings = {
   animate: false
 };
 
-
-
 const sketch = () => {
   return ({ context, width, height }) => {
-
-
 
     let waveA = {
       pos: height/2,
@@ -32,11 +27,11 @@ const sketch = () => {
       phase: 0,
     }
     guiA.add(waveA, 'pos', 0, height)
-    guiA.add(waveA, 'freq', -0.01, 0.01)
+    guiA.add(waveA, 'freq', -0.1, 0.1)
     guiA.add(waveA, 'amp', -800, 800)
     guiA.add(waveA, 'phase', -Math.PI, Math.PI)
     guiB.add(waveB, 'pos', 0, height)
-    guiB.add(waveB, 'freq', -0.01, 0.01)
+    guiB.add(waveB, 'freq', -0.1, 0.1)
     guiB.add(waveB, 'amp', -800, 800)
     guiB.add(waveB, 'phase', -Math.PI, Math.PI)
 
@@ -60,7 +55,4 @@ const sketch = () => {
   };
 };
 
-
-
 canvasSketch(sketch, settings);
-
