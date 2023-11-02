@@ -10,22 +10,21 @@
 */
 
 import * as dat from 'dat.gui'
-import {read_cookie} from './bakery.js'
+import canvasToSVG from './canvas-to-svg.js'
 
 const canvasSketch = require('canvas-sketch');
 const svg = require('./canvas-to-svg.js');
 const { color } = require('canvas-sketch-util');
 const canvasHeight = 2000;
 const aspectRatio = 16/9;
-var guiValues;
+var guiValues; 
 
 const settings = {
   dimensions: [ canvasHeight, canvasHeight/aspectRatio ],
 };
 
 const sketch = () => {
-  return svg(props => {
-    const { context, width, height } = props;
+  return ({ context, width, height }) => {
       
       // #region GUI PROPERTIES
 
@@ -134,20 +133,10 @@ const sketch = () => {
 
       var save = {
         save: function() {
-          guiValues = gui.getSaveObject()
-          var cookieOut = ["guiValuesCookie", '=', JSON.stringify(guiValues)].join('');  
-          document.cookieOut = cookieOut;
-          console.log(cookieOut)
+          
         }
       }
-      var load = {
-        load: function() {
-          var cookieIn = read_cookie("guiValuesCookie")
-          console.log(cookieIn)
-          //cookieIn = JSON.stringify(cookieIn)
-          let gui = new dat.GUI({load: cookieIn});
-        }
-      }
+
       // #region GUI MAIN
       let gui = new dat.GUI({name: 'GUI'});
       
@@ -157,7 +146,7 @@ const sketch = () => {
       const subguiA = guiA.addFolder('subwaveA')
       const subguiB = guiB.addFolder('subwaveB')
       
-      guiA.add(waveA, 'pos', 0, height)
+      guiA.add(waveA, 'pos', 0, height).listen()
       guiA.add(waveA, 'freq', -0.1, 0.1)
       guiA.add(waveA, 'amp', -800, 800)
       guiA.add(waveA, 'phase', -Math.PI, Math.PI)
@@ -198,12 +187,21 @@ const sketch = () => {
       guiStyle.add(lineColor, 'value').name('Line Color')
       guiStyle.add(bgColor, 'value').name('BG Color')
       
-      gui.add(save, 'save').name('Save')
-      gui.add(load, 'load').name('Load')
-      
-     
-      
-      
+      gui.add({
+          exportSVG: function () {
+            const svgString = new canvasToSVG(sketch);
+            console.log(svgString)
+            const blob = new Blob([svgString], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'drawing.svg';
+            link.click();
+            URL.revokeObjectURL(url);
+          },
+        },
+        'exportSVG'
+      ).name('Export as SVG');
 
       function animate() {
         
@@ -212,19 +210,20 @@ const sketch = () => {
         finalWaveA.freq = waveA.freq * length.value 
         finalWaveA.amp = waveA.amp * scale.value * zoom.value * xStretch.value
         finalWaveA.phase = waveA.phase * xRotation.value
-        finalSubwaveA.freq = subwaveA.freq * density.value
-        finalSubwaveA.amp = subwaveA.amp * thickness.value
+        finalSubwaveA.freq = subwaveA.freq * density.value 
+        finalSubwaveA.amp = subwaveA.amp * thickness.value * zoom.value
         finalSubwaveA.phase = subwaveA.phase * tubeRotation.value
 
         finalWaveB.pos = waveB.pos * yPosition.value
         finalWaveB.freq = waveB.freq * length.value
         finalWaveB.amp = waveB.amp * scale.value * zoom.value * yStretch.value
         finalWaveB.phase = waveB.phase * yRotation.value
-        finalSubwaveB.freq = subwaveB.freq * density.value
-        finalSubwaveB.amp = subwaveB.amp * thickness.value
+        finalSubwaveB.freq = subwaveB.freq * density.value 
+        finalSubwaveB.amp = subwaveB.amp * thickness.value * zoom.value
         finalSubwaveB.phase = subwaveB.phase
 
         requestAnimationFrame(animate)
+    
         context.clearRect(0, 0, width, height);
         
         context.fillStyle = bgColor.value;
@@ -237,7 +236,7 @@ const sketch = () => {
         context.moveTo(width/2, height/2)
         context.beginPath();
         
-        for(let i = 0; i < width; i=i+0.1){
+        for(let i = 0; i < width; i=i+0.01){
           let waveA_i = finalWaveA.pos + Math.sin(i * finalWaveA.freq + finalWaveA.phase) * finalWaveA.amp;
           let waveB_i = finalWaveB.pos + Math.sin(i * finalWaveB.freq + finalWaveB.phase) * finalWaveB.amp;
           let subwaveA_i = finalSubwaveA.pos + Math.sin(i * finalSubwaveA.freq + finalSubwaveA.phase) * finalSubwaveA.amp;
@@ -249,7 +248,7 @@ const sketch = () => {
       }
       animate();
 
-  });
+  };
 };
 
 canvasSketch(sketch, settings);
