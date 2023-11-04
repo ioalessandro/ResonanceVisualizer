@@ -4,13 +4,11 @@
 - implement harmonic switch
 
 - svg export
-
-
-
 */
 
 import * as dat from 'dat.gui'
 import canvasToSVG from './canvas-to-svg.js'
+import C2S from './C2S.js'
 
 const canvasSketch = require('canvas-sketch');
 const svg = require('./canvas-to-svg.js');
@@ -21,6 +19,7 @@ var guiValues;
 
 const settings = {
   dimensions: [ canvasHeight, canvasHeight/aspectRatio ],
+  encoding: ''
 };
 
 const sketch = () => {
