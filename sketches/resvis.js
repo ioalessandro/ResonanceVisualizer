@@ -23,7 +23,8 @@ const settings = {
 };
 
 const sketch = () => {
-  return ({ context, width, height }) => {
+  return svg(props => {
+  const { context, width, height } = props;
       
       // #region GUI PROPERTIES
 
@@ -132,7 +133,7 @@ const sketch = () => {
 
       var save = {
         save: function() {
-          
+          svg({canvas, height, width})
         }
       }
 
@@ -188,7 +189,32 @@ const sketch = () => {
       
       gui.add({
           exportSVG: function () {
-            const svgString = new canvasToSVG(sketch);
+            const svgString = svg(props => {
+              const {context, width, height} = props;
+              
+              context.clearRect(0, 0, width, height);
+      
+              context.fillStyle = bgColor.value;
+              context.fillRect(0, 0, width, height);
+              context.strokeStyle = lineColor.value;
+              context.lineWidth = lineWidth.value * zoom.value;
+              context.lineCap = "round";
+
+
+              context.moveTo(width/2, height/2)
+              context.beginPath();
+        
+              for(let i = 0; i < width; i=i+0.01){
+                let waveA_i = finalWaveA.pos + Math.sin(i * finalWaveA.freq + finalWaveA.phase) * finalWaveA.amp;
+                let waveB_i = finalWaveB.pos + Math.sin(i * finalWaveB.freq + finalWaveB.phase) * finalWaveB.amp;
+                let subwaveA_i = finalSubwaveA.pos + Matha.sin(i * finalSubwaveA.freq + finalSubwaveA.phase) * finalSubwaveA.amp;
+                let subwaveB_i = finalSubwaveB.pos + Math.sin(i * finalSubwaveB.freq + finalSubwaveB.phase) * finalSubwaveB.amp;
+
+                context.lineTo(waveA_i+subwaveA_i, waveB_i+subwaveB_i)
+              }
+              context.stroke();
+            })
+            
             console.log(svgString)
             const blob = new Blob([svgString], { type: 'image/svg+xml' });
             const url = URL.createObjectURL(blob);
@@ -198,9 +224,8 @@ const sketch = () => {
             link.click();
             URL.revokeObjectURL(url);
           },
-        },
-        'exportSVG'
-      ).name('Export as SVG');
+        },'exportSVG').name('Export as SVG');
+
 
       function animate() {
         
@@ -220,7 +245,7 @@ const sketch = () => {
         finalSubwaveB.freq = subwaveB.freq * density.value 
         finalSubwaveB.amp = subwaveB.amp * thickness.value * zoom.value
         finalSubwaveB.phase = subwaveB.phase
-
+        
         requestAnimationFrame(animate)
     
         context.clearRect(0, 0, width, height);
@@ -247,7 +272,7 @@ const sketch = () => {
       }
       animate();
 
-  };
+  });
 };
 
 canvasSketch(sketch, settings);
