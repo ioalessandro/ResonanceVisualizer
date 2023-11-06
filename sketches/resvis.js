@@ -7,15 +7,11 @@
 */
 
 import * as dat from 'dat.gui'
-import canvasToSVG from './canvas-to-svg.js'
 import C2S from './C2S.js'
 
 const canvasSketch = require('canvas-sketch');
-const svg = require('./canvas-to-svg.js');
-const { color } = require('canvas-sketch-util');
 const canvasHeight = 2000;
 const aspectRatio = 16/9;
-var guiValues; 
 
 const settings = {
   dimensions: [ canvasHeight, canvasHeight/aspectRatio ],
@@ -191,8 +187,8 @@ const sketch = () => {
             var ctx = new C2S(width,height); //width, height of your desired svg file
             //do your normal canvas stuff:
             ctx.clearRect(0, 0, width, height)
-            ctx.fillStyle = bgColor.value;
-            ctx.fillRect(0, 0, width, height);
+            //ctx.fillStyle = bgColor.value;
+            //ctx.fillRect(0, 0, width, height);
             ctx.strokeStyle = lineColor.value;
             ctx.lineWidth = lineWidth.value * zoom.value;
             ctx.lineCap = "round";
