@@ -188,7 +188,29 @@ const sketch = () => {
       
       gui.add({
           exportSVG: function () {
-            const svgString = new canvasToSVG(sketch);
+            var ctx = new C2S(width,height); //width, height of your desired svg file
+            //do your normal canvas stuff:
+            ctx.clearRect(0, 0, width, height)
+            ctx.fillStyle = bgColor.value;
+            ctx.fillRect(0, 0, width, height);
+            ctx.strokeStyle = lineColor.value;
+            ctx.lineWidth = lineWidth.value * zoom.value;
+            ctx.lineCap = "round";
+            ctx.moveTo(width/2, height/2)
+            ctx.beginPath();
+
+            for(let i = 0; i < width; i=i+0.1){
+              let waveA_i = finalWaveA.pos + Math.sin(i * finalWaveA.freq + finalWaveA.phase) * finalWaveA.amp;
+              let waveB_i = finalWaveB.pos + Math.sin(i * finalWaveB.freq + finalWaveB.phase) * finalWaveB.amp;
+              let subwaveA_i = finalSubwaveA.pos + Math.sin(i * finalSubwaveA.freq + finalSubwaveA.phase) * finalSubwaveA.amp;
+              let subwaveB_i = finalSubwaveB.pos + Math.sin(i * finalSubwaveB.freq + finalSubwaveB.phase) * finalSubwaveB.amp;
+            
+              ctx.lineTo(waveA_i+subwaveA_i, waveB_i+subwaveB_i)
+            }
+            ctx.stroke();
+            //ok lets serialize to SVG:
+            var svgString = ctx.getSerializedSvg(true); //true here will replace any named entities with numbered ones.
+                                      //Standalone SVG doesn't support most named entities.
             console.log(svgString)
             const blob = new Blob([svgString], { type: 'image/svg+xml' });
             const url = URL.createObjectURL(blob);
@@ -235,7 +257,7 @@ const sketch = () => {
         context.moveTo(width/2, height/2)
         context.beginPath();
         
-        for(let i = 0; i < width; i=i+0.01){
+        for(let i = 0; i < width; i=i+0.1){
           let waveA_i = finalWaveA.pos + Math.sin(i * finalWaveA.freq + finalWaveA.phase) * finalWaveA.amp;
           let waveB_i = finalWaveB.pos + Math.sin(i * finalWaveB.freq + finalWaveB.phase) * finalWaveB.amp;
           let subwaveA_i = finalSubwaveA.pos + Math.sin(i * finalSubwaveA.freq + finalSubwaveA.phase) * finalSubwaveA.amp;
